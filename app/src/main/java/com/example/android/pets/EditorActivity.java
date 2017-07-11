@@ -15,11 +15,15 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +31,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.pets.data.PetDbHelper;
 import com.example.android.pets.data.PetsContract.PetsEntry;
 
 /**
@@ -53,6 +60,8 @@ public class EditorActivity extends AppCompatActivity {
      */
     private int mGender = 0;
 
+    private PetDbHelper mDbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +74,10 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        mDbHelper = new PetDbHelper(this);
     }
+
 
     /**
      * Setup the dropdown spinner that allows the user to select the gender of the pet.
@@ -114,13 +126,38 @@ public class EditorActivity extends AppCompatActivity {
         return true;
     }
 
+    private void insertPet(){
+        String name = mNameEditText.getText().toString().trim();
+        String breed = mBreedEditText.getText().toString().trim();
+        int gender = mGender;
+        int iWeight = Integer.parseInt(mWeightEditText.getText().toString().trim());
+
+        ContentValues values = new ContentValues();
+        values.put(PetsEntry.COLUMN_PET_NAME, name);
+        values.put(PetsEntry.COLUMN_PET_BREED,breed);
+        values.put(PetsEntry.COLUMN_PET_GENDER, gender);
+        values.put(PetsEntry.COLUMN_PET_WEIGHT,iWeight);
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Insert the new row, returning the primary key value of the new row
+        long newRowId = db.insert(PetsEntry.TABLE_NAME, null, values);
+        if (newRowId != -1) {
+            Toast.makeText(EditorActivity.this,"Pet added succesfully",Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Toast.makeText(EditorActivity.this,"Error while adding the text",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                insertPet();
+                finish(); // Goes back to the previous activity
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -134,5 +171,6 @@ public class EditorActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 }
