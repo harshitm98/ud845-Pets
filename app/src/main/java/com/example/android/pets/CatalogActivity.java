@@ -127,17 +127,57 @@ public class CatalogActivity extends AppCompatActivity {
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetsEntry.TABLE_NAME, null);
+        String [] projection = {
+                PetsEntry._ID,
+                PetsEntry.COLUMN_PET_NAME,
+                PetsEntry.COLUMN_PET_BREED,
+                PetsEntry.COLUMN_PET_GENDER,
+                PetsEntry.COLUMN_PET_WEIGHT
+        };
+
+        Cursor cursor = db.query(
+                PetsEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
             displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+            displayView.append("\n _id-name-breed-gender-weight");
+
+            int idIndex = cursor.getColumnIndex(PetsEntry._ID);
+            int nameIndex = cursor.getColumnIndex(PetsEntry.COLUMN_PET_NAME);
+            int breedIndex = cursor.getColumnIndex(PetsEntry.COLUMN_PET_BREED);
+            int genderIndex = cursor.getColumnIndex(PetsEntry.COLUMN_PET_GENDER);
+            int weightIndex = cursor.getColumnIndex(PetsEntry.COLUMN_PET_WEIGHT);
+
+
+
+            while(cursor.moveToNext()){
+
+
+                displayView.append("\n" +
+                cursor.getString(idIndex) +
+                " - " + cursor.getString(nameIndex) +
+                " - " + cursor.getString(breedIndex) +
+                " - " + cursor.getString(genderIndex) +
+                " - " + cursor.getString(weightIndex));
+            }
+
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
             cursor.close();
         }
+
+
+
     }
 
 }
